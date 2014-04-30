@@ -1,0 +1,30 @@
+{
+    "name":        "diegopso/dor-require",
+    "description": "Zend Framework 2 Module for load static files",
+    "type":        "library",
+    "license":     "MIT",
+    "keywords":    [
+        "module",
+        "zf2"
+    ],
+    "authors": [
+        {
+            "name": "Carlos André Ferrari",
+            "email": "caferrari@gmail.com",
+            "homepage": "http://ferrari.eti.br/"
+        },
+        {
+            "name": "Diego Oliveira Rodrigues",
+            "email": "diegopso2@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload" : {
+        "psr-0": {
+            "Dor\\Require\\": "src/"
+        }
+    }
+}
