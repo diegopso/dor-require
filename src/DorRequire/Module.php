@@ -1,6 +1,6 @@
 <?php
 
-namespace Dor\Require;
+namespace DorRequire;
 
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
