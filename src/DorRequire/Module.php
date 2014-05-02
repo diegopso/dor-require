@@ -4,6 +4,7 @@ namespace DorRequire;
 
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
+use DorRequire\View\Helper\RequireAsset;
 
 class Module
 {
@@ -14,7 +15,26 @@ class Module
 
     public function getConfig()
     {
-        return include __DIR__ . '/../../config/module.config.php';
+        return array();
+    }
+
+    public function getViewHelperConfig()
+    {
+        return array(
+            'factories' => array(
+                'require' => function ($sm) {
+                    $config = $sm->getServiceLocator()->get('config');
+
+                    if (!isset($config['dor-require'])) {
+                        $config['dor-require'] = array();
+                    }
+
+                    $resolver = new Resolver($config['dor-require']);
+                    $require = new RequireAsset($resolver);
+                    return $require;
+                }
+            ),
+        );
     }
 
     public function getAutoloaderConfig()

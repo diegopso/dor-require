@@ -7,15 +7,13 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 class RequireAsset extends AbstractHelper implements ServiceLocatorAwareInterface
 {
-    protected $queue;
-
-    protected $dependencies;
+    protected $resolver;
 
     protected $serviceLocator;
 
-    public function __construct()
+    public function __construct(\DorRequire\Resolver $resolver)
     {
-        $this->queue = array();
+        $this->resolver = $resolver;
     }
 
     public function __invoke()
@@ -23,7 +21,7 @@ class RequireAsset extends AbstractHelper implements ServiceLocatorAwareInterfac
         $ids = func_get_args();
 
         foreach ($ids as $id) {
-            $this->addToQueue($id);
+            $this->resolver->appendDependencie($id);
         }
 
         return $this;
@@ -31,41 +29,22 @@ class RequireAsset extends AbstractHelper implements ServiceLocatorAwareInterfac
 
     public function __toString()
     {
-        $this->queue = array_merge($this->getPriorities(), $this->queue);
-        $tags = $this->resolveDependencies($this->queue);
-        return implode("\n", $tags) . "\n";
-    }
+        $priorities = $this->getPriorities();
 
-    protected function addToQueue($id)
-    {
-        if (!in_array($id, $this->queue)) {
-            array_push($this->queue, $id);
-        }
-    }
-
-    protected function resolveDependencies($dependencies)
-    {
-        $tags = array();
-
-        if ($dependencies) {
-            $config = $this->getConfig();
-
-            foreach ($dependencies as $dependencie) {
-                $tags += $this->loadLibrary($config[$dependencie]);
-            }
+        foreach ($priorities as $priority) {
+            $this->resolver->prependDependencie($priority);
         }
 
-        return $tags;
+        $files = $this->resolver->solve();
+        return $this->render($files);
     }
 
-    protected function loadLibrary($files)
+    protected function render($files)
     {
-        $tags = array();
+        $tags = '';
 
-        foreach ($files as $file => $subDependencies) {
-            $tags += $this->resolveDependencies($subDependencies);
-            $tag = array($file => $this->createScriptTag($file));
-            $tags += $tag;
+        foreach ($files as $file) {
+            $tags .= $this->createScriptTag($file);
         }
 
         return $tags;
@@ -73,7 +52,7 @@ class RequireAsset extends AbstractHelper implements ServiceLocatorAwareInterfac
 
     protected function createScriptTag($file)
     {
-        return '<script type="text/javascript" src="'. $file .'"></script>';
+        return '<script type="text/javascript" src="'. $file .'"></script>' . "\n";
     }
 
     protected function getPriorities()
